@@ -12,6 +12,27 @@ ProductTag.init(
       primaryKey: true,
       autoIncrement: true,
     },
+    product_id: {
+      type: DataTypes.INTEGER,
+      allowNull:false,
+      references: {
+        model : "product",
+        key: "product_id"
+      },
+      onDelete : 'cascade',
+      onUpdate: 'cascade',
+    },
+    tag_id: {
+      type: DataTypes.INTEGER,
+      allowNull:false,
+      references: {
+        model: "tag",
+        key: "product_id",
+      },
+      onDelete : 'cascade',
+      onUpdate: 'cascade',
+
+    }
     // define columns
   },
   {
