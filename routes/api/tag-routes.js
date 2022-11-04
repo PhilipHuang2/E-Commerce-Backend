@@ -29,10 +29,26 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   // create a new tag
+  /* req.body should look like this...
+    {
+      tag_name: "new School",
+      productIds: [1, 2, 3, 4]
+    }
+  */
   try{
-    const tagData = Tag.create(req.body);
+    const tagData = await Tag.create(req.body);
+    if(req.body.productIds.length){
+      const tagProductIdArr = req.body.productIds.map((product_id) =>{
+        return {
+          tag_id: tagData.id,
+          product_id
+        }
+      });
+      ProductTag.bulkCreate(tagProductIdArr);
+    }
     res.status(200).json(tagData);
   } catch(err){
+    console.log(err);
     res.status(500).json(err);
   }
 });
@@ -40,7 +56,8 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
   try{
-    const tagData = Tag.update(req.body,{ where: {id: req.params.id}});
+    const tagData = await Tag.update(req.body,{ where: {id: req.params.id}});
+    const 
     res.status(200).json(tagData);
   }catch(err){
     res.status(500).json(err);
