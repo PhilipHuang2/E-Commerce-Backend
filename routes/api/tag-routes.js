@@ -54,11 +54,32 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-  // update a tag's name by its `id` value
   try{
+    // update a tag's name by its `id` value
     const tagData = await Tag.update(req.body,{ where: {id: req.params.id}});
-    const 
-    res.status(200).json(tagData);
+    // find all the associated products with the old tag name
+    const tagsProduct = await ProductTag.findAll({where: {tag_id: req.params.id}});
+    // get list of current product_ids
+    const tagProductIds = tagsProduct.map(({product_id}) => product_id);
+    //create filtered List of new product_ids
+    const newProductTags = req.body.productIds
+      .filter((product_id)=> !tagProductIds.includes(product_id))
+      .map((product_id)=> {
+        return {
+          tag_id: req.params.id,
+          product_id
+        };
+      });
+      // figure out which ones to remove
+    const productTagstoRemove = tagsProduct
+      .filter(({product_id}) => !req.body.productIds.includes(product_id))
+      .map(({id}) => id);
+    // both productTagsToRemove and don't have proper stuff
+    console.log(productTagstoRemove);
+    console.log(newProductTags);
+    await ProductTag.destroy({where: {id: productTagstoRemove}});
+    const updatedProductTags = await ProductTag.bulkCreate(newProductTags);  
+    res.status(200).json(updatedProductTags);
   }catch(err){
     res.status(500).json(err);
   }
